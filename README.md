@@ -14,16 +14,11 @@ Repository: https://github.com/pabloripoll/docker-php-8.3
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/trafex/php-nginx.svg)](https://hub.docker.com/r/trafex/php-nginx/)
-![nginx 1.24](https://img.shields.io/badge/nginx-1.24-brightgreen.svg)
-![php 8.3](https://img.shields.io/badge/php-8.3-brightgreen.svg)
-![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
-
-## [![Personal Page](https://pabloripoll.com/files/logo-light-100x300.png)](https://timdepater.com?mtm_campaign=github)
+## [![Personal Page](https://pabloripoll.com/files/logo-light-100x300.png)](https://github.com/pabloripoll)
 
 ## Goal of this project
-The goal of this container image is to provide an example for running Nginx and PHP-FPM in a container which follows
-the best practices and is easy to understand and modify to your needs.
+
+The goal of this container image is to provide an example for running Nginx and PHP-FPM in a container which follows the best practices and is easy to understand and modify to your needs.
 
 ## Usage
 
