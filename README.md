@@ -2,7 +2,7 @@
 
 Example PHP-FPM 8.3 & Nginx 1.24 container image for Docker, built on [Alpine Linux](https://www.alpinelinux.org/).
 
-Repository: https://github.com/pabloripoll/docker-php-8.3
+Repository: https://github.com/pabloripoll/docker-php-8.3-service
 
 * Built on the lightweight and secure Alpine Linux distribution
 * Multi-platform, supporting AMD4, ARMv6, ARMv7, ARM64
