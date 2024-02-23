@@ -8,12 +8,12 @@ C_RED='\033[0;31m'
 C_YEL='\033[0;33m'
 C_END='\033[0m'
 
-include ../.env
+include .env
 
-DOCKER_ABBR="BUCKET"
-DOCKER_HOST=$(HOSTNAME)
-DOCKER_PORT=$(BUCKET_PORT)
-DOCKER_NAME=$(PROJECT)$(BUCKET_PROJECT)$(PROJECT_CODE)
+DOCKER_ABBR=$(PROJECT_ABBR)
+DOCKER_HOST=$(PROJECT_HOST)
+DOCKER_PORT=$(PROJECT_PORT)
+DOCKER_NAME=$(PROJECT_NAME)
 
 CURRENT_DIR=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
 DIR_BASENAME=$(shell basename $(CURRENT_DIR))
@@ -33,13 +33,16 @@ help: ## shows this Makefile help message
 # -------------------------------------------------------------------------------------------------
 #  System
 # -------------------------------------------------------------------------------------------------
-.PHONY: fix-permission host-check
+.PHONY: hostname fix-permission host-check
+
+hostname: ## shows local machine ip
+	echo $(word 1,$(shell hostname -I))
 
 fix-permission: ## sets project directory permission
 	$(DOCKER_USER) chown -R ${USER}: $(ROOT_DIR)/
 
 host-check: ## shows this project ports availability on local machine
-	echo "Checking configuration for "${C_YEL}"$(DOCKER_NAME)"${C_END}" App Container:";
+	echo "Checking configuration for "${C_YEL}"$(DOCKER_NAME)"${C_END}" container:";
 	if [ -z "$$($(DOCKER_USER) lsof -i :$(DOCKER_PORT))" ]; then \
 		echo ${C_BLU}"$(DOCKER_ABBR)"${C_END}" > port:"${C_GRN}"$(DOCKER_PORT) is free to use."${C_END}; \
     else \
@@ -56,8 +59,7 @@ env: ## checks if docker .env file exists
 		echo ${C_BLU}"$(DOCKER_ABBR) DOCKER ENV"${C_END}" file "${C_GRN}"is set."${C_END}; \
     else \
 		echo ${C_BLU}"$(DOCKER_ABBR) DOCKER ENV"${C_END}${C_YEL}" is not set."${C_END}" \
-	Create it from root dir by "${C_YEL}"$$ make $(shell echo $(DOCKER_ABBR) | tr A-Z a-z)-env-set"${C_END}" \
-	or from ./$(DIR_BASENAME)/ by "${C_YEL}"$$ make env-set"${C_END}; \
+	Create it by executing "${C_YEL}"$$ make env-set"${C_END}; \
 	fi
 
 env-set: ## sets docker .env file
@@ -86,24 +88,25 @@ dev:
 up:
 	cd docker && $(DOCKER_COMPOSE) up -d
 	$(DOCKER_USER) docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(DOCKER_NAME)
-	echo 127.0.0.1:$(DOCKER_PORT)
+	echo 127.0.0.1:$(DOCKER_PORT); \
+	echo $(HOSTNAME):$(DOCKER_PORT); \
 
 container-ip:
 	$(DOCKER_USER) docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(DOCKER_NAME)
 	echo $(DOCKER_PORT)
 
 start:
-	up dev
+	$(MAKE) up dev
 
 first:
-	build install dev
+	$(MAKE) build install dev
 
 stop:
 	cd docker && $(DOCKER_COMPOSE) kill || true
 	cd docker && $(DOCKER_COMPOSE) rm --force || true
 
 restart:
-	stop start dev
+	$(MAKE) stop start dev
 
 clear:
 	cd docker && $(DOCKER_COMPOSE) down -v --remove-orphans || true
