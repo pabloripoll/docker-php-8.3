@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  slight83:
+    image: slight83:php-8.3-alpine-3.19
+    pull_policy: never
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    container_name: ${COMPOSE_PROJECT_NAME}
+    ports:
+      - ${COMPOSE_PROJECT_PORT}:80
+    volumes:
+      - type: bind
+        source: ../
+        target: /var/www/html
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail http://${COMPOSE_PROJECT_HOST}:${COMPOSE_PROJECT_PORT}/fpm-ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    tty: true
