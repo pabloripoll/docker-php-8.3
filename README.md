@@ -24,7 +24,7 @@ Thus not includes a database neither other services like message broker or maili
 
 ## Usage on Windows systems
 
-You can use the makefile that comes with this repository or manually update the [docker/.env](docker/.env) file to feed the `docker-compose.yml` file.
+You can use the makefile that comes with this repository or manually update the [./docker/.env](./docker/.env) file to feed the `docker-compose.yml` file.
 
 ## Usage on Unix based systems
 
