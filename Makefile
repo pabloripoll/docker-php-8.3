@@ -71,6 +71,23 @@ env-set: ## sets docker .env file
 	echo ${C_BLU}"$(DOCKER_ABBR)"${C_END}" docker-compose.yml .env file "${C_GRN}"has been set."${C_END};
 
 # -------------------------------------------------------------------------------------------------
+#  Docker
+# -------------------------------------------------------------------------------------------------
+.PHONY: hostname fix-permission host-check
+
+docker-ip:
+	$(DOCKER_USER) docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(DOCKER_NAME)
+
+docker-host:
+	echo ${C_BLU}"Docker Host:"${C_END}; \
+	echo $(shell make docker-ip):$(DOCKER_PORT)
+	echo ${C_BLU}"Local Host:"${C_END}; \
+	echo localhost:$(DOCKER_PORT); \
+	echo 127.0.0.1:$(DOCKER_PORT); \
+	echo ${C_BLU}"Project Host:"${C_END}; \
+	echo $(DOCKER_HOST):$(DOCKER_PORT); \
+
+# -------------------------------------------------------------------------------------------------
 #  Container
 # -------------------------------------------------------------------------------------------------
 .PHONY: ssh build install dev up start first stop restart clear
@@ -85,33 +102,24 @@ install:
 	cd docker && $(DOCKER_EXEC_TOOLS_APP) -c $(COMPOSER_INSTALL)
 
 dev:
-	cd docker && $(DOCKER_EXEC_TOOLS_APP) -c $(SERVER_RUN)
+	echo ${C_YEL}"\"dev\" recipe has not usage in this project"${C_END};
 
 up:
 	cd docker && $(DOCKER_COMPOSE) up -d
-	echo Container Host:; \
-	$(DOCKER_USER) docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(DOCKER_NAME)
-	echo Local Host:; \
-	echo localhost:$(DOCKER_PORT); \
-	echo 127.0.0.1:$(DOCKER_PORT); \
-	echo $(DOCKER_HOST):$(DOCKER_PORT); \
-
-container-ip:
-	$(DOCKER_USER) docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(DOCKER_NAME)
-	echo $(DOCKER_PORT)
+	$(MAKE) docker-host
 
 start:
-	$(MAKE) up dev
+	$(MAKE) build up
 
 first:
-	$(MAKE) build install dev
+	$(MAKE) build install up
 
 stop:
 	cd docker && $(DOCKER_COMPOSE) kill || true
 	cd docker && $(DOCKER_COMPOSE) rm --force || true
 
 restart:
-	$(MAKE) stop start dev
+	$(MAKE) stop start
 
 clear:
 	cd docker && $(DOCKER_COMPOSE) down -v --remove-orphans || true
