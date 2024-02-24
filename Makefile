@@ -42,7 +42,7 @@ fix-permission: ## sets project directory permission
 	$(DOCKER_USER) chown -R ${USER}: $(ROOT_DIR)/
 
 host-check: ## shows this project ports availability on local machine
-	echo "Checking configuration for "${C_YEL}"$(DOCKER_NAME)"${C_END}" container:";
+	echo "Checking configuration for "${C_YEL}"$(DOCKER_ABBR)"${C_END}" container:";
 	if [ -z "$$($(DOCKER_USER) lsof -i :$(DOCKER_PORT))" ]; then \
 		echo ${C_BLU}"$(DOCKER_ABBR)"${C_END}" > port:"${C_GRN}"$(DOCKER_PORT) is free to use."${C_END}; \
     else \

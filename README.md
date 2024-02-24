@@ -1,6 +1,6 @@
-# Alpine 3.19 / Nginx 1.24 / PHP 8.3
+# Alpine 3.19 / Nginx 1.24 / PHP 8.3 - Service
 
-Example PHP-FPM 8.3 & Nginx 1.24 container image for Docker, built on [Alpine Linux](https://www.alpinelinux.org/).
+PHP-FPM 8.3 & Nginx 1.24 container image for Docker, built on [Alpine Linux 3.19](https://www.alpinelinux.org/).
 
 Repository: https://github.com/pabloripoll/docker-php-8.3-service
 
@@ -14,49 +14,79 @@ Repository: https://github.com/pabloripoll/docker-php-8.3-service
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
 
-## [![Personal Page](https://pabloripoll.com/files/logo-light-100x300.png)](https://github.com/pabloripoll)
+## [![Personal Page](https://pabloripoll.com/files/logo-light-100x300.png)](https://github.com/pabloripoll?tab=repositories)
 
-## Goal of this project
+## Project as Service
 
-The goal of this container image is to provide an example for running Nginx and PHP-FPM in a container which follows the best practices and is easy to understand and modify to your needs.
+The goal of this container image is to provide a start up application with the basic enviroment to deploy a php service running with Nginx and PHP-FPM in a container which follows the best practices and is easy to understand and modify to your needs.
 
-## Usage
+Thus not includes a database neither other services like message broker or mailing, etc.
 
-You can use the makefile that comes with this repository or manually update the `.env` file to feed the `docker-compose.yml` file.
+## Usage on Windows systems
+
+You can use the makefile that comes with this repository or manually update the [docker/.env](docker/.env) file to feed the `docker-compose.yml` file.
+
+## Usage on Unix based systems
+
+Makefiles are often used to automate the process of building and compiling software on Unix-based systems, including Linux and macOS.
 
 Checkout the Mkaefile recepies:
 ```
 $ make help
 ```
 
-## Configuration
-In [config/](config/) you'll find the default configuration files for Nginx, PHP and PHP-FPM.
+Example:
+```
+$ make host-check
+
+Checking configuration for MY PHP APP container:
+MY PHP APP > port:8888 is free to use.
+```
+
+## Reset configurations on the run
+In [docker/config/](docker/config/) you'll find the default configuration files for Nginx, PHP and PHP-FPM.
+
 If you want to extend or customize that you can do so by mounting a configuration file in the correct folder;
 
 Nginx configuration:
-
-    docker run -v "`pwd`/nginx-server.conf:/etc/nginx/conf.d/server.conf" trafex/php-nginx
+```
+$ docker run -v "`pwd`/nginx-server.conf:/etc/nginx/conf.d/server.conf" ${COMPOSE_PROJECT_NAME}
+```
 
 PHP configuration:
-
-    docker run -v "`pwd`/php-setting.ini:/etc/php83/conf.d/settings.ini" trafex/php-nginx
+```
+$ docker run -v "`pwd`/php-setting.ini:/etc/php83/conf.d/settings.ini" ${COMPOSE_PROJECT_NAME}
+```
 
 PHP-FPM configuration:
-
-    docker run -v "`pwd`/php-fpm-settings.conf:/etc/php83/php-fpm.d/server.conf" trafex/php-nginx
+```
+$ docker run -v "`pwd`/php-fpm-settings.conf:/etc/php83/php-fpm.d/server.conf" ${COMPOSE_PROJECT_NAME}
+```
 
 _Note; Because `-v` requires an absolute path I've added `pwd` in the example to return the absolute path to the current directory_
 
 
-Create an `.env` file from `.env.example` to define on which port the container will be running.
+## Troubleshoots
 
-The Dockerfile comes with Alpine 3.19, Nginx 1.24, Supervisor, PHP 8.3 and Composer.
+If you want to connect to another container running your local machine *(for e.g.: database, bucket)* use your ip to do so *(not localhost or 127.0.0.1)*.
 
-So, if you want to connect to another container running for instance a database, use your ip to do so *(not localhost or 127.0.0.1)*
-
-Find out your IP on Linux and take the first ip listed
+Find out your IP on UNIX systems and take the first ip listed
 ```
 $ hostname -I
 
 191.128.1.41 172.17.0.1 172.20.0.1 172.21.0.1
+```
+
+Find out your IP on Windows as `administrator user` and take the first ip listed
+```
+C:\WINDOWS\system32>ipconfig /all
+
+Windows IP Configuration
+
+ Host Name . . . . . . . . . . . . : 191.128.1.41
+ Primary Dns Suffix . . . . . . . : andrew.ad.cmu.edu
+ Node Type . . . . . . . . . . . . : Peer-Peer
+ IP Routing Enabled. . . . . . . . : No
+ WINS Proxy Enabled. . . . . . . . : No
+ DNS Suffix Search List. . . . . . : scs.ad.cs.cmu.edu
 ```
