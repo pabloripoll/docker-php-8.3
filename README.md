@@ -1,6 +1,14 @@
-# Alpine 3.19 / Nginx 1.24 / PHP 8.3 - Service
+# PHP - Service
 
-PHP-FPM 8.3 & Nginx 1.24 container image for Docker, built on [Alpine Linux 3.19](https://www.alpinelinux.org/).
+Container image for Docker
+
+## Alpine 3.19 / Nginx 1.24 / PHP 8.3
+
+- [PHP-FPM 8.3](https://www.php.net/releases/8.3/en.php)
+
+- [Nginx 1.24](https://nginx.org/)
+
+- [Alpine Linux 3.19](https://www.alpinelinux.org/)
 
 Repository: https://github.com/pabloripoll/docker-php-8.3-service
 
@@ -89,7 +97,7 @@ Going to remove myphp
  ✔ Container myphp  Removed
 ```
 
-Clear container
+Clear container network
 ```bash
 $ make clear
 [+] Running 1/1
@@ -171,7 +179,7 @@ C:\WINDOWS\system32>ipconfig /all
 Windows IP Configuration
 
  Host Name . . . . . . . . . . . . : 191.128.1.41
- Primary Dns Suffix . . . . . . . : andrew.ad.cmu.edu
+ Primary Dns Suffix. . . . . . . . : paul.ad.cmu.edu
  Node Type . . . . . . . . . . . . : Peer-Peer
  IP Routing Enabled. . . . . . . . : No
  WINS Proxy Enabled. . . . . . . . : No
