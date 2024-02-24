@@ -89,9 +89,12 @@ dev:
 
 up:
 	cd docker && $(DOCKER_COMPOSE) up -d
+	echo Container Host:; \
 	$(DOCKER_USER) docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(DOCKER_NAME)
+	echo Local Host:; \
+	echo localhost:$(DOCKER_PORT); \
 	echo 127.0.0.1:$(DOCKER_PORT); \
-	echo $(HOSTNAME):$(DOCKER_PORT); \
+	echo $(DOCKER_HOST):$(DOCKER_PORT); \
 
 container-ip:
 	$(DOCKER_USER) docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(DOCKER_NAME)

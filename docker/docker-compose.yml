@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   slight83:
-    image: slight83:php-8.3-alpine-3.19
+    image: php-8.3:alpine-3.19
     pull_policy: never
     build:
       context: ./

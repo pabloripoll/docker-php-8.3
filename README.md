@@ -43,6 +43,93 @@ Checking configuration for MY PHP APP container:
 MY PHP APP > port:8888 is free to use.
 ```
 
+Build container
+```bash
+$ make build
+[+] Building 33.0s (25/25) FINISHED                                                                               docker:default
+ => [slight83 internal] load build definition from Dockerfile                                                     0.0s
+ => => transferring dockerfile: 2.43kB
+...
+ => => exporting layers                                                                                           0.7s
+ => => writing image sha256:05b7369d7c730f1571dbbd4b46137a67c9f87c5ef9fa686225cb55a46277aca1                      0.0s
+ => => naming to docker.io/library/slight83:php-8.3-alpine-3.19                                                   0.0s
+[+] Running 1/2
+ ⠦ Network myphp_default  Created                                                                                 0.6s
+ ✔ Container myphp        Started
+```
+
+Up container
+```bash
+$ make up
+[+] Running 1/1
+ ✔ Container myphp  Started                                                                                                                                                   0.4s
+Container Host:
+172.19.0.2
+Local Host:
+localhost:8888
+127.0.0.1:8888
+191.128.1.41:8888
+```
+
+Build & Up container
+```bash
+$ make build up
+[+] Building 32.4s (25/25) FINISHED
+...
+```
+TOTAL TIME: 32.4s
+
+Stop container
+```bash
+$ make stop
+[+] Killing 1/1
+ ✔ Container myphp  Killed                                                                                        0.4s
+Going to remove myphp
+[+] Removing 1/0
+ ✔ Container myphp  Removed
+```
+
+Clear container
+```bash
+$ make clear
+[+] Running 1/1
+ ✔ Network myphp_default  Removed
+```
+
+## Docker Info
+
+Docker container
+```bash
+$ sudo docker ps -a
+CONTAINER ID   IMAGE      COMMAND    CREATED         STATUS                     PORTS                                             NAMES
+0f94fe4739a6   php-8...   "doc…"     2 minutes ago   Up 2 minutes (unhealthy)   9000/tcp, 0.0.0.0:8888->80/tcp, :::8888->80/tcp   myphp
+```
+
+Docker image
+```bash
+$ sudo docker images
+REPOSITORY   TAG           IMAGE ID       CREATED         SIZE
+php-8.3      alpine-3.19   8f7db0dfcde1   3 minutes ago   199MB
+```
+
+Docker stats
+```bash
+$ sudo docker system df
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          1         1         199.5MB   0B (0%)
+Containers      1         1         4B        0B (0%)
+Local Volumes   1         0         117.9MB   117.9MB (100%)
+Build Cache     39        0         10.2kB    10.2kB
+```
+
+Removing container and image generated
+```bash
+$ sudo docker system prune
+...
+Total reclaimed space: 116.4MB
+```
+*(no need for pruning volume)*
+
 ## Reset configurations on the run
 In [docker/config/](docker/config/) you'll find the default configuration files for Nginx, PHP and PHP-FPM.
 
