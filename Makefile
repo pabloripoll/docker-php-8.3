@@ -14,6 +14,7 @@ DOCKER_ABBR=$(PROJECT_ABBR)
 DOCKER_HOST=$(PROJECT_HOST)
 DOCKER_PORT=$(PROJECT_PORT)
 DOCKER_NAME=$(PROJECT_NAME)
+DOCKER_PATH=$(PROJECT_PATH)
 
 CURRENT_DIR=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
 DIR_BASENAME=$(shell basename $(CURRENT_DIR))
@@ -56,17 +57,18 @@ host-check: ## shows this project ports availability on local machine
 
 env: ## checks if docker .env file exists
 	if [ -f ./docker/.env ]; then \
-		echo ${C_BLU}"$(DOCKER_ABBR) DOCKER ENV"${C_END}" file "${C_GRN}"is set."${C_END}; \
+		echo ${C_BLU}$(DOCKER_ABBR)${C_END}" docker-compose.yml .env file "${C_GRN}"is set."${C_END}; \
     else \
-		echo ${C_BLU}"$(DOCKER_ABBR) DOCKER ENV"${C_END}${C_YEL}" is not set."${C_END}" \
+		echo ${C_BLU}$(DOCKER_ABBR)${C_END}" docker-compose.yml .env file "${C_RED}"is not set."${C_END}" \
 	Create it by executing "${C_YEL}"$$ make env-set"${C_END}; \
 	fi
 
 env-set: ## sets docker .env file
-	echo "COMPOSE_PROJECT_NAME=$(DOCKER_NAME)\
+	echo "COMPOSE_PROJECT_NAME=\"$(DOCKER_NAME)\"\
 	\nCOMPOSE_PROJECT_HOST=$(DOCKER_HOST)\
-	\nCOMPOSE_PROJECT_PORT=$(DOCKER_PORT)" > ./docker/.env; \
-	echo ${C_BLU}"$(DOCKER_ABBR) DOCKER ENV"${C_END}" file "${C_GRN}"has been set."${C_END};
+	\nCOMPOSE_PROJECT_PORT=$(DOCKER_PORT)\
+	\nCOMPOSE_PROJECT_PATH=\"$(DOCKER_PATH)\"" > ./docker/.env; \
+	echo ${C_BLU}"$(DOCKER_ABBR)"${C_END}" docker-compose.yml .env file "${C_GRN}"has been set."${C_END};
 
 # -------------------------------------------------------------------------------------------------
 #  Container
