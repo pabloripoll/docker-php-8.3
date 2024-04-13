@@ -100,7 +100,7 @@ Directories and main files on a tree architecture description
 │
 ├── resources
 │   ├── doc
-│   │   └── (any file or directory required for re-building the app...)
+│   │   └── (any documentary file...)
 │   │
 │   └── project
 │       └── (any file or directory required for re-building the app...)
