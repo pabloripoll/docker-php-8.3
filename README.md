@@ -202,7 +202,7 @@ $ make project-create
 
 SYMFONY docker-compose.yml .env file has been set.
 
-[+] Building 67.8s (28/28) FINISHED                                                 docker:default
+[+] Building 67.8s (28/28) FINISHED                                       docker:default
 => [nginx-php internal] load build definition from Dockerfile                       0.0s
  => => transferring dockerfile: 2.88kB                                              0.0s
  => [nginx-php internal] load metadata for docker.io/library/composer:latest        1.5s
