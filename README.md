@@ -181,45 +181,41 @@ $ make hostname
 192.168.1.41
 ```
 
+## Project Service
+
+If the container is built with the pre-installed application content, by browsing to localhost with the selected port configured [http://localhost:8888/](http://localhost:8888/) will display the successfully installation welcome page.
+
+The pre-installed application could require to update its dependencies. The following Makefile recipe will update dependencies set on `composer.json` file
+```bash
+$ make project-update
+```
+
+If it is needed to build the container with other type of application *(like a PHP framework)*, there is a Makefile recipe to set at [docker/Makefile](docker/Makefile) all the commands needed for its installation.
+```bash
+$ make project-install
+```
+
 ## Create the application container service
 
 ```bash
-$ make symfony-create
+$ make project-create
 
 SYMFONY docker-compose.yml .env file has been set.
 
-[+] Building 54.3s (26/26) FINISHED                                                 docker:default
+[+] Building 67.8s (28/28) FINISHED                                                 docker:default
 => [nginx-php internal] load build definition from Dockerfile                       0.0s
- => => transferring dockerfile: 2.78kB                                              0.0s
+ => => transferring dockerfile: 2.88kB                                              0.0s
  => [nginx-php internal] load metadata for docker.io/library/composer:latest        1.5s
  => [nginx-php internal] load metadata for docker.io/library/php:8.3-fpm-alpine     1.5s
  => [nginx-php internal] load .dockerignore                                         0.0s
- => => transferring context: 108B                                                   0.0s
- => [nginx-php internal] load build context                                         0.0s
- => => transferring context: 8.30kB                                                 0.0s
- => [nginx-php] FROM docker.io/library/composer:latest@sha256:63c0f08ca41370...
+
 ...
- => [nginx-php] exporting to image                                                  1.0s
- => => exporting layers                                                             1.0s
- => => writing image sha256:3c99f91a63edd857a0eaa13503c00d500fad57cf5e29ce1d...     0.0s
- => => naming to docker.io/library/symfony-app:symfony-nginx-php                    0.0s
-[+] Running 1/2
- ⠴ Network symfony-app_default  Created                                             0.4s
- ✔ Container symfony-app        Started                                             0.3s
+
+[+] Running 2/2
+ ⠴ Network proj-php_default  Created                                                0.4s
+ ✔ Container proj-php        Started                                                0.3s
 [+] Running 1/0
- ✔ Container symfony-app        Running
-```
-
-If container service has been built with the application content completed, accessing by browsing [http://localhost:8888/](http://localhost:8888/) will display the successful installation welcome page.
-
-If container has been built without application, the following Makefile recipe will install the application that is configure in [docker/nginx-php/Makefile](docker/nginx-php/Makefile) service
-```bash
-$ make symfony-install
-```
-
-If container has been built with the application copy from repository, the following Makefile recipe will update the application dependencies
-```bash
-$ make symfony-update
+ ✔ Container proj-php        Running
 ```
 
 ## Container Information
@@ -228,46 +224,46 @@ Running container on Docker
 ```bash
 $ sudo docker ps -a
 CONTAINER ID   IMAGE      COMMAND    CREATED      STATUS      PORTS                                             NAMES
-ecd27aeae010   symf...    "docker-php-entrypoi…"  1 min...    9000/tcp, 0.0.0.0:8888->80/tcp, :::8888->80/tcp   symfony-app
+ecd27aeae010   proj...    "docker-php-entrypoi…"  1 min...    9000/tcp, 0.0.0.0:8888->80/tcp, :::8888->80/tcp   project-app
 ```
 
 Docker image size
 ```bash
 $ sudo docker images
 REPOSITORY   TAG           IMAGE ID       CREATED         SIZE
-symfony-app  symf...       373f6967199b   5 minutes ago   251MB
+project-app  proj...       373f6967199b   5 minutes ago   261MB
 ```
 
 Stats regarding the amount of disk space used by the container
 ```bash
 $ sudo docker system df
 TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
-Images          1         1         251.4MB   0B (0%)
+Images          1         1         260.7MB   0B (0%)
 Containers      1         1         4B        0B (0%)
-Local Volumes   1         0         117.9MB   117.9MB (100%)
-Build Cache     39        0         10.56kB   10.56kB
+Local Volumes   1         0         473.2MB   473.2MB (100%)
+Build Cache     39        0         15.06kB   15.06kB
 ```
 
 ## Stopping the Container Service
 
 Using the following Makefile recipe stops application from running, keeping database persistance and application files binded without any loss
 ```bash
-$ make symfony-stop
+$ make project-stop
 [+] Stopping 1/1
- ✔ Container symfony-app  Stopped                                                    0.5s
+ ✔ Container project-app  Stopped                                                    0.5s
 ```
 
 ## Removing the Container Image
 
 To remove application container from Docker network use the following Makefile recipe *(Docker prune commands still needed to be applied manually)*
 ```bash
-$ make symfony-destroy
+$ make project-destroy
 
 [+] Removing 1/0
- ✔ Container symfony-app  Removed                                                     0.0s
+ ✔ Container project-app  Removed                                                     0.0s
 [+] Running 1/1
- ✔ Network symfony-app_default  Removed                                               0.4s
-Untagged: symfony-app:symfony-nginx-php
+ ✔ Network project-app_default  Removed                                               0.4s
+Untagged: project-app:project-nginx-php
 Deleted: sha256:3c99f91a63edd857a0eaa13503c00d500fad57cf5e29ce1da3210765259c35b1
 ```
 
@@ -275,7 +271,7 @@ Removing container and image generated
 ```bash
 $ sudo docker system prune
 ...
-Total reclaimed space: 171.2MB
+Total reclaimed space: 171.5MB
 ```
 
 Pruning Docker volume cache
