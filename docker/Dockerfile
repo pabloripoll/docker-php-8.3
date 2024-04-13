@@ -101,7 +101,7 @@ COPY config/fpm-pool.conf /etc/${PHP_V}/php-fpm.d/www.conf
 COPY config/php.ini /etc/${PHP_V}/conf.d/custom.ini
 
 # Configure XDebug
-#COPY config/xdebug.ini /etc/${PHP_V}/conf.d/xdebug.ini
+COPY config/xdebug.ini /etc/${PHP_V}/conf.d/xdebug.ini
 
 # Configure supervisord
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

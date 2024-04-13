@@ -42,43 +42,46 @@ host-check: ## shows this project ports availability on local machine
 # -------------------------------------------------------------------------------------------------
 .PHONY: project-ssh project-set project-create project-start project-stop project-destroy project-install project-update
 
-project-ssh: ## enters the Project container shell
+project-ssh: ## enters the project container shell
 	cd docker && $(MAKE) ssh
 
-project-set: ## sets the Project PHP enviroment file to build the container
+project-set: ## sets the project enviroment file to build the container
 	cd docker && $(MAKE) env-set
 
-project-create: ## creates the Project PHP container from Docker image
+project-create: ## creates the project container from Docker image
 	cd docker && $(MAKE) build up
 
-project-start: ## starts the Project PHP container running
+project-start: ## starts the project container running
 	cd docker && $(MAKE) start
 
-project-stop: ## stops the Project PHP container but data won't be destroyed
+project-stop: ## stops the project container but data won't be destroyed
 	cd docker && $(MAKE) stop
 
-project-destroy: ## removes the Project PHP from Docker network destroying its data and Docker image
+project-destroy: ## removes the project from Docker network destroying its data and Docker image
 	cd docker && $(MAKE) clear destroy
 
-project-install: ## installs set version of Project into container
+project-install: ## installs set version of project into container
 	cd docker && $(MAKE) app-install
 
-project-update: ## updates set version of Project into container
+project-update: ## updates set version of project into container
 	cd docker && $(MAKE) app-update
 
 # -------------------------------------------------------------------------------------------------
 #  Container
 # -------------------------------------------------------------------------------------------------
-.PHONY: sql-install sql-replace sql-backup
+.PHONY: database-install database-replace database-backup
 
-sql-install:
-	sudo docker exec -i $(PROJECT_DB_CAAS) sh -c 'exec mysql $(PROJECT_DB_NAME) -uroot -p"$(PROJECT_DB_ROOT)"' < $(PROJECT_DB_PATH)/$(PROJECT_DB_NAME)-init.sql
+database-install: ## installs into container database the init sql file from resources/database
+	sudo docker exec -i $(DB_CAAS) sh -c 'exec mysql $(DB_NAME) -uroot -p"$(DB_ROOT)"' < $(DB_BACKUP_PATH)/$(DB_BACKUP_NAME)-init.sql
+	echo ${C_YEL}"DATABASE"${C_END}" has been installed."
 
-sql-replace:
-	sudo docker exec -i $(PROJECT_DB_CAAS) sh -c 'exec mysql $(PROJECT_DB_NAME) -uroot -p"$(PROJECT_DB_ROOT)"' < $(PROJECT_DB_PATH)/$(PROJECT_DB_NAME)-backup.sql
+database-replace: ## replaces container database with the latest sql backup file from resources/database
+	sudo docker exec -i $(DB_CAAS) sh -c 'exec mysql $(DB_NAME) -uroot -p"$(DB_ROOT)"' < $(DB_BACKUP_PATH)/$(DB_BACKUP_NAME)-backup.sql
+	echo ${C_YEL}"DATABASE"${C_END}" has been replaced."
 
-sql-backup:
-	sudo docker exec $(PROJECT_DB_CAAS) sh -c 'exec mysqldump $(PROJECT_DB_NAME) -uroot -p"$(PROJECT_DB_ROOT)"' > $(PROJECT_DB_PATH)/$(PROJECT_DB_NAME)-backup.sql
+database-backup: ## creates / replace a sql backup file from container database in resources/database
+	sudo docker exec $(DB_CAAS) sh -c 'exec mysqldump $(DB_NAME) -uroot -p"$(DB_ROOT)"' > $(DB_BACKUP_PATH)/$(DB_BACKUP_NAME)-backup.sql
+	echo ${C_YEL}"DATABASE"${C_END}" backup has been created."
 
 # -------------------------------------------------------------------------------------------------
 #  Repository Helper
@@ -88,5 +91,5 @@ repo-flush: ## clears local git repository cache specially to update .gitignore
 	git add .
 	git commit -m "fix: cache cleared for untracked files"
 
-repo-commit:
+repo-commit: ## echoes commit helper
 	echo "git add . && git commit -m \"maint: ... \" && git push -u origin main"

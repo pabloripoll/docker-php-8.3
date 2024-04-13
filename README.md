@@ -1,8 +1,16 @@
-# PHP - Service
+<div style="width:100%;float:left;clear:both;margin-bottom:50px;">
+    <a href="https://github.com/pabloripoll?tab=repositories">
+        <img style="width:150px;float:left;" src="https://pabloripoll.com/files/logo-light-100x300.png"/>
+    </a>
+</div>
 
-Container image for Docker
+# PHP 8 - Service
 
-## Alpine 3.19 / Nginx 1.24 / PHP 8.3
+The objective of this repository is having a CaaS [Containers as a Service](https://www.ibm.com/topics/containers-as-a-service) to provide a "ready to use" container with the basic enviroment features to deploy any application service under a lightweight Linux Alpine image with Nginx server platform and [PHP-FPM](https://www.php.net/manual/en/install.fpm.php) for development stage requirements.
+
+The container configuration is as [Host Network](https://docs.docker.com/network/drivers/host/) on `eth0` as [Bridge network](https://docs.docker.com/network/drivers/bridge/), thus it can be accessed through `localhost:${PORT}` by browsers but to connect with it or this with other services `${HOSTNAME}:${PORT}` will be required.
+
+## Container Service
 
 - [PHP-FPM 8.3](https://www.php.net/releases/8.3/en.php)
 
@@ -10,170 +18,51 @@ Container image for Docker
 
 - [Alpine Linux 3.19](https://www.alpinelinux.org/)
 
-Repository: https://github.com/pabloripoll/docker-php-8.3-service
+### Database Service
 
-* Built on the lightweight and secure Alpine Linux distribution
+This project does not include a database service for it is intended to connect to a database instance like in a cloud database environment or similar.
+
+To emulate a SQL database service it can be used the following [MariaDB 10.11](https://mariadb.com/kb/en/changes-improvements-in-mariadb-1011/) repository:
+- [https://github.com/pabloripoll/docker-mariadb-10.11](https://github.com/pabloripoll/docker-mariadb-10.11)
+
+### Project objetives with Docker
+
+* Built on the lightweight and secure Alpine 3.19 [2024 release](https://www.alpinelinux.org/posts/Alpine-3.19.1-released.html) Linux distribution
 * Multi-platform, supporting AMD4, ARMv6, ARMv7, ARM64
 * Very small Docker image size (+/-40MB)
-* Uses PHP 8.3 for the best performance, low CPU usage & memory footprint
+* Uses PHP 8.3 as default for the best performance, low CPU usage & memory footprint, but also can be downgraded till PHP 8.0
 * Optimized for 100 concurrent users
 * Optimized to only use resources when there's traffic (by using PHP-FPM's `on-demand` process manager)
-* The services Nginx, PHP-FPM and supervisord run under a non-privileged user (nobody) to make it more secure
+* The services Nginx, PHP-FPM and supervisord run under a project-privileged user to make it more secure
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
+* Services independency to connect the application to other database allocation
 
-## [![Personal Page](https://pabloripoll.com/files/logo-light-100x300.png)](https://github.com/pabloripoll?tab=repositories)
+#### PHP config
 
-## Project as Service
-
-The goal of this container image is to provide a start up application with the basic enviroment to deploy a php service running with Nginx and PHP-FPM in a container which follows the best practices and is easy to understand and modify to your needs.
-
-Thus not includes a database neither other services like message broker or mailing, etc.
-
-## Usage on Windows systems
-
-You can use the makefile that comes with this repository or manually update the [./docker/.env](./docker/.env) file to feed the `docker-compose.yml` file.
-
-## Usage on Unix based systems
-
-Makefiles are often used to automate the process of building and compiling software on Unix-based systems, including Linux and macOS.
-
-Checkout the Mkaefile recepies:
-```
-$ make help
-```
-
-Example:
-```
-$ make host-check
-
-Checking configuration for MY PHP APP container:
-MY PHP APP > port:8888 is free to use.
-```
-
-Build container
-```bash
-$ make build
-[+] Building 33.0s (25/25) FINISHED                                                                               docker:default
- => [slight83 internal] load build definition from Dockerfile                                                     0.0s
- => => transferring dockerfile: 2.43kB
+To use a different PHP 8 version the following [Dockerfile](docker/nginx-php/docker/Dockerfile) arguments and variable has to be modified:
+```Dockerfile
+ARG PHP_VERSION=8.3
+ARG PHP_ALPINE=83
 ...
- => => exporting layers                                                                                           0.7s
- => => writing image sha256:05b7369d7c730f1571dbbd4b46137a67c9f87c5ef9fa686225cb55a46277aca1                      0.0s
- => => naming to docker.io/library/slight83:php-8.3-alpine-3.19                                                   0.0s
-[+] Running 1/2
- ⠦ Network myphp_default  Created                                                                                 0.6s
- ✔ Container myphp        Started
+ENV PHP_V="php83"
 ```
 
-Up container
+Also, it has to be informed to [Supervisor Config](docker/nginx-php/docker/config/supervisord.conf) the PHP-FPM version to run.
 ```bash
-$ make up
-[+] Running 1/1
- ✔ Container myphp  Started                                                                                                                                                   0.4s
-Container Host:
-172.19.0.2
-Local Host:
-localhost:8888
-127.0.0.1:8888
-191.128.1.41:8888
-```
-
-Build & Up container
-```bash
-$ make build up
-[+] Building 32.4s (25/25) FINISHED
+...
+[program:php-fpm]
+command=php-fpm83 -F
 ...
 ```
-TOTAL TIME: 32.4s
 
-Stop container
+#### Containers on Windows systems
+
+This project has not been tested on Windows OS neither I can use it to test it. So, I cannot bring much support on it.
+
+Anyway, using this repository you will needed to find out your PC IP by login as an `administrator user` to set connection between containers.
+
 ```bash
-$ make stop
-[+] Killing 1/1
- ✔ Container myphp  Killed                                                                                        0.4s
-Going to remove myphp
-[+] Removing 1/0
- ✔ Container myphp  Removed
-```
-
-Clear container network
-```bash
-$ make clear
-[+] Running 1/1
- ✔ Network myphp_default  Removed
-```
-
-## Docker Info
-
-Docker container
-```bash
-$ sudo docker ps -a
-CONTAINER ID   IMAGE      COMMAND    CREATED         STATUS                     PORTS                                             NAMES
-0f94fe4739a6   php-8...   "doc…"     2 minutes ago   Up 2 minutes (unhealthy)   9000/tcp, 0.0.0.0:8888->80/tcp, :::8888->80/tcp   myphp
-```
-
-Docker image
-```bash
-$ sudo docker images
-REPOSITORY   TAG           IMAGE ID       CREATED         SIZE
-php-8.3      alpine-3.19   8f7db0dfcde1   3 minutes ago   199MB
-```
-
-Docker stats
-```bash
-$ sudo docker system df
-TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
-Images          1         1         199.5MB   0B (0%)
-Containers      1         1         4B        0B (0%)
-Local Volumes   1         0         117.9MB   117.9MB (100%)
-Build Cache     39        0         10.2kB    10.2kB
-```
-
-Removing container and image generated
-```bash
-$ sudo docker system prune
-...
-Total reclaimed space: 116.4MB
-```
-*(no need for pruning volume)*
-
-## Reset configurations on the run
-In [docker/config/](docker/config/) you'll find the default configuration files for Nginx, PHP and PHP-FPM.
-
-If you want to extend or customize that you can do so by mounting a configuration file in the correct folder;
-
-Nginx configuration:
-```
-$ docker run -v "`pwd`/nginx-server.conf:/etc/nginx/conf.d/server.conf" ${COMPOSE_PROJECT_NAME}
-```
-
-PHP configuration:
-```
-$ docker run -v "`pwd`/php-setting.ini:/etc/php83/conf.d/settings.ini" ${COMPOSE_PROJECT_NAME}
-```
-
-PHP-FPM configuration:
-```
-$ docker run -v "`pwd`/php-fpm-settings.conf:/etc/php83/php-fpm.d/server.conf" ${COMPOSE_PROJECT_NAME}
-```
-
-_Note; Because `-v` requires an absolute path I've added `pwd` in the example to return the absolute path to the current directory_
-
-
-## Troubleshoots
-
-If you want to connect to another container running your local machine *(for e.g.: database, bucket)* use your ip to do so *(not localhost or 127.0.0.1)*.
-
-Find out your IP on UNIX systems and take the first ip listed
-```
-$ hostname -I
-
-191.128.1.41 172.17.0.1 172.20.0.1 172.21.0.1
-```
-
-Find out your IP on Windows as `administrator user` and take the first ip listed
-```
 C:\WINDOWS\system32>ipconfig /all
 
 Windows IP Configuration
@@ -184,4 +73,205 @@ Windows IP Configuration
  IP Routing Enabled. . . . . . . . : No
  WINS Proxy Enabled. . . . . . . . : No
  DNS Suffix Search List. . . . . . : scs.ad.cs.cmu.edu
+```
+
+Take the first ip listed. Wordpress container will connect with database container using that IP.
+
+#### Containers on Unix based systems
+
+Find out your IP on UNIX systems and take the first IP listed
+```bash
+$ hostname -I
+
+191.128.1.41 172.17.0.1 172.20.0.1 172.21.0.1
+```
+
+## Structure
+
+Directories and main files on a tree architecture description
+```
+.
+│
+├── docker
+│   ├── config
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── Makefile
+│
+├── resources
+│   ├── database
+│   │   ├── project-init.sql
+│   │   └── project-backup.sql
+│   │
+│   └── project
+│       └── (any file or directory required for re-building the app...)
+│
+├── project
+│   └── (application...)
+│
+├── .env
+├── .env.example
+└── Makefile
+```
+
+## Automation with Makefile
+
+Makefiles are often used to automate the process of building and compiling software on Unix-based systems as Linux and macOS.
+
+*On Windows - I recommend to use Makefile: \
+https://stackoverflow.com/questions/2532234/how-to-run-a-makefile-in-windows*
+
+Makefile recipies
+```bash
+$ make help
+usage: make [target]
+
+targets:
+Makefile  help                    shows this Makefile help message
+Makefile  hostname                shows local machine ip
+Makefile  fix-permission          sets project directory permission
+Makefile  host-check              shows this project ports availability on local machine
+Makefile  project-ssh             enters the project container shell
+Makefile  project-set             sets the project enviroment file to build the container
+Makefile  project-create          creates the project container from Docker image
+Makefile  project-start           starts the project container running
+Makefile  project-stop            stops the project container but data will not be destroyed
+Makefile  project-destroy         removes the project from Docker network destroying its data and Docker image
+Makefile  project-install         installs set version of project into container
+Makefile  project-update          updates set version of project into container
+Makefile  database-install        installs into container database the init sql file from resources/database
+Makefile  database-replace        replaces container database with the latest sql backup file from resources/database
+Makefile  database-backup         creates / replace a sql backup file from container database in resources/database
+Makefile  repo-flush              clears local git repository cache specially to update .gitignore
+Makefile  repo-commit             echoes commit helper
+```
+
+## Service Configuration
+
+Create a [DOTENV](.env) file from [.env.example](.env.example) and setup according to your project requirement the following variables
+```
+# REMOVE COMMENTS WHEN COPY THIS FILE
+
+# Leave it empty if no need for sudo user to execute docker commands
+DOCKER_USER=sudo
+
+# Container data for docker-compose.yml
+PROJECT_TITLE="SYMFONY"   # <- this name will be prompt for Makefile recipes
+PROJECT_ABBR="symfony"    # <- part of the service image tag - useful if similar services are running
+
+# Symfony container
+PROJECT_HOST="127.0.0.1"                    # <- for this project is not necessary
+PROJECT_PORT="8888"                         # <- port access container service on local machine
+PROJECT_CAAS="symfony-app"                  # <- container as a service name to build service
+PROJECT_PATH="../../../symfony"             # <- path where application is binded from container to local
+
+# Database service container
+DB_CAAS="mariadb"                           # <- name of the database docker container service to access by ssh
+DB_NAME="mariadb"                           # <- name of the database to copy or replace
+DB_ROOT="7c4a8d09ca3762af61e59520943d"      # <- database root password
+DB_BACKUP_NAME="symfony"                    # <- the name of the database backup or copy file
+DB_BACKUP_PATH="resources/database"         # <- path where database backup or copy resides
+```
+
+Exacute the following command to create the [docker/.env](docker/.env) file, required for building the container
+```bash
+$ make symfony-set
+PROJECT docker-compose.yml .env file has been set.
+```
+
+Checkout port availability from the set enviroment
+```bash
+$ make host-check
+
+Checking configuration for PROJECT container:
+PROJECT > port:8888 is free to use.
+```
+
+Checkout local machine IP to set connection between container services using the following makefile recipe if required
+```bash
+$ make hostname
+
+192.168.1.41
+```
+
+Removing container and image generated
+```bash
+$ sudo docker system prune
+...
+Total reclaimed space: 171.2MB
+```
+
+*(no need for pruning volume)*
+
+## Dockerfile insight
+
+```
+# Install main packages and remove default server definition
+RUN apk add --no-cache \
+  curl \
+  wget \
+  nginx \
+  curl \
+  zip \
+  bash \
+  vim \
+  git \
+  supervisor
+
+RUN set -xe \
+    && apk add --no-cache --virtual .build-deps \
+        libzip-dev \
+        freetype-dev \
+        icu-dev \
+        libmcrypt-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        libxslt-dev \
+        patch \
+        openssh-client
+
+# Install PHP and its extensions packages and remove default server definition
+ENV PHP_V="php83"
+
+RUN apk add --no-cache \
+  ${PHP_V} \
+  ${PHP_V}-cli \
+  ${PHP_V}-ctype \
+  ${PHP_V}-curl \
+  ${PHP_V}-dom \
+  ${PHP_V}-fileinfo \
+  ${PHP_V}-fpm \
+  ${PHP_V}-gd \
+  ${PHP_V}-intl \
+  ${PHP_V}-mbstring \
+  ${PHP_V}-opcache \
+  ${PHP_V}-openssl \
+  ${PHP_V}-phar \
+  ${PHP_V}-session \
+  ${PHP_V}-tokenizer \
+  ${PHP_V}-soap \
+  ${PHP_V}-xml \
+  ${PHP_V}-xmlreader \
+  ${PHP_V}-xmlwriter \
+  ${PHP_V}-simplexml \
+  ${PHP_V}-zip \
+  # Databases
+  ${PHP_V}-pdo \
+  ${PHP_V}-pdo_sqlite \
+  ${PHP_V}-sqlite3 \
+  ${PHP_V}-pdo_mysql \
+  ${PHP_V}-mysqlnd \
+  ${PHP_V}-mysqli \
+  ${PHP_V}-pdo_pgsql \
+  ${PHP_V}-pgsql \
+  ${PHP_V}-mongodb \
+  ${PHP_V}-redis
+
+# PHP Docker
+RUN docker-php-ext-install pdo pdo_mysql gd
+
+# PHP PECL extensions
+RUN apk add \
+  ${PHP_V}-pecl-amqp \
+  ${PHP_V}-pecl-xdebug
 ```
