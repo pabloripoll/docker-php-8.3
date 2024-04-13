@@ -260,7 +260,7 @@ Untagged: project-app:project-nginx-php
 Deleted: sha256:3c99f91a63edd857a0eaa13503c00d500fad57cf5e29ce1da3210765259c35b1
 ```
 
-Removing container and image generated
+Pruning Docker system cache
 ```bash
 $ sudo docker system prune
 ...
