@@ -49,7 +49,7 @@ project-set: ## sets the project enviroment file to build the container
 	cd docker && $(MAKE) env-set
 
 project-create: ## creates the project container from Docker image
-	cd docker && $(MAKE) build up
+	cd docker && $(MAKE) env-set build up
 
 project-start: ## starts the project container running
 	cd docker && $(MAKE) start
