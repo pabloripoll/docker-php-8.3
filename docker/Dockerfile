@@ -26,7 +26,24 @@ RUN apk add --no-cache \
   curl \
   wget \
   nginx \
+  curl \
+  zip \
+  bash \
+  vim \
+  git \
   supervisor
+
+RUN set -xe \
+    && apk add --no-cache --virtual .build-deps \
+        libzip-dev \
+        freetype-dev \
+        icu-dev \
+        libmcrypt-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        libxslt-dev \
+        patch \
+        openssh-client
 
 # Install PHP and its extensions packages and remove default server definition
 ENV PHP_V="php83"
@@ -51,17 +68,27 @@ RUN apk add --no-cache \
   ${PHP_V}-xml \
   ${PHP_V}-xmlreader \
   ${PHP_V}-xmlwriter \
+  ${PHP_V}-simplexml \
   ${PHP_V}-zip \
-  # Database
+  # Databases
   ${PHP_V}-pdo \
   ${PHP_V}-pdo_sqlite \
   ${PHP_V}-sqlite3 \
   ${PHP_V}-pdo_mysql \
+  ${PHP_V}-mysqlnd \
   ${PHP_V}-mysqli \
   ${PHP_V}-pdo_pgsql \
   ${PHP_V}-pgsql \
   ${PHP_V}-mongodb \
   ${PHP_V}-redis
+
+# PHP Docker
+RUN docker-php-ext-install pdo pdo_mysql gd
+
+# PHP PECL extensions
+RUN apk add \
+  ${PHP_V}-pecl-amqp \
+  ${PHP_V}-pecl-xdebug
 
 # Configure nginx - http
 COPY config/nginx.conf /etc/nginx/nginx.conf
@@ -73,14 +100,14 @@ COPY config/conf.d /etc/nginx/conf.d/
 COPY config/fpm-pool.conf /etc/${PHP_V}/php-fpm.d/www.conf
 COPY config/php.ini /etc/${PHP_V}/conf.d/custom.ini
 
+# Configure XDebug
+COPY config/xdebug.ini /etc/${PHP_V}/conf.d/xdebug.ini
+
 # Configure supervisord
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Make sure files/folders needed by the processes are accessable when they run under the nobody user
 RUN chown -R docker.docker /var/www/html /run /var/lib/nginx /var/log/nginx
-
-# PHP Docker
-RUN docker-php-ext-install pdo pdo_mysql
 
 # PHP Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
@@ -95,8 +122,8 @@ USER docker
 # Add application
 COPY --chown=docker.docker ../ /var/www/html/
 
-# Expose the port Nginx is reachable on
-EXPOSE 80
+# Expose the port Nginx is reachable on / 9003 is for Xdebug
+EXPOSE 80 443 9003
 
 # Let supervisord start nginx & php-fpm
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -10,20 +10,11 @@ C_END='\033[0m'
 
 include .env
 
-DOCKER_ABBR=$(PROJECT_ABBR)
-DOCKER_HOST=$(PROJECT_HOST)
-DOCKER_PORT=$(PROJECT_PORT)
-DOCKER_NAME=$(PROJECT_NAME)
-DOCKER_PATH=$(PROJECT_PATH)
+DOCKER_TITLE=$(PROJECT_TITLE)
 
 CURRENT_DIR=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
 DIR_BASENAME=$(shell basename $(CURRENT_DIR))
 ROOT_DIR=$(CURRENT_DIR)
-DOCKER_COMPOSE?=$(DOCKER_USER) docker compose
-DOCKER_COMPOSE_RUN=$(DOCKER_COMPOSE) run --rm
-DOCKER_EXEC_TOOLS_APP=$(DOCKER_USER) docker exec -it $(DOCKER_NAME) sh
-
-COMPOSER_INSTALL="composer update"
 
 help: ## shows this Makefile help message
 	echo 'usage: make [target]'
@@ -38,88 +29,64 @@ help: ## shows this Makefile help message
 
 hostname: ## shows local machine ip
 	echo $(word 1,$(shell hostname -I))
+	echo $(ip addr show | grep "\binet\b.*\bdocker0\b" | awk '{print $2}' | cut -d '/' -f 1)
 
 fix-permission: ## sets project directory permission
 	$(DOCKER_USER) chown -R ${USER}: $(ROOT_DIR)/
 
 host-check: ## shows this project ports availability on local machine
-	echo "Checking configuration for "${C_YEL}"$(DOCKER_ABBR)"${C_END}" container:";
-	if [ -z "$$($(DOCKER_USER) lsof -i :$(DOCKER_PORT))" ]; then \
-		echo ${C_BLU}"$(DOCKER_ABBR)"${C_END}" > port:"${C_GRN}"$(DOCKER_PORT) is free to use."${C_END}; \
-    else \
-		echo ${C_BLU}"$(DOCKER_ABBR)"${C_END}" > port:"${C_RED}"$(DOCKER_PORT) is busy. Update ./.env file."${C_END}; \
-	fi
+	cd docker && $(MAKE) port-check
 
 # -------------------------------------------------------------------------------------------------
-#  Enviroment
+#  PHP App Service
 # -------------------------------------------------------------------------------------------------
-.PHONY: env env-set
+.PHONY: project-ssh project-set project-create project-start project-stop project-destroy project-install project-update
 
-env: ## checks if docker .env file exists
-	if [ -f ./docker/.env ]; then \
-		echo ${C_BLU}$(DOCKER_ABBR)${C_END}" docker-compose.yml .env file "${C_GRN}"is set."${C_END}; \
-    else \
-		echo ${C_BLU}$(DOCKER_ABBR)${C_END}" docker-compose.yml .env file "${C_RED}"is not set."${C_END}" \
-	Create it by executing "${C_YEL}"$$ make env-set"${C_END}; \
-	fi
+project-ssh: ## enters the Project container shell
+	cd docker && $(MAKE) ssh
 
-env-set: ## sets docker .env file
-	echo "COMPOSE_PROJECT_NAME=\"$(DOCKER_NAME)\"\
-	\nCOMPOSE_PROJECT_HOST=$(DOCKER_HOST)\
-	\nCOMPOSE_PROJECT_PORT=$(DOCKER_PORT)\
-	\nCOMPOSE_PROJECT_PATH=\"$(DOCKER_PATH)\"" > ./docker/.env; \
-	echo ${C_BLU}"$(DOCKER_ABBR)"${C_END}" docker-compose.yml .env file "${C_GRN}"has been set."${C_END};
+project-set: ## sets the Project PHP enviroment file to build the container
+	cd docker && $(MAKE) env-set
 
-# -------------------------------------------------------------------------------------------------
-#  Docker
-# -------------------------------------------------------------------------------------------------
-.PHONY: hostname fix-permission host-check
+project-create: ## creates the Project PHP container from Docker image
+	cd docker && $(MAKE) build up
 
-docker-ip:
-	$(DOCKER_USER) docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(DOCKER_NAME)
+project-start: ## starts the Project PHP container running
+	cd docker && $(MAKE) start
 
-docker-host:
-	echo ${C_BLU}"Docker Host:"${C_END}; \
-	echo $(shell make docker-ip):$(DOCKER_PORT)
-	echo ${C_BLU}"Local Host:"${C_END}; \
-	echo localhost:$(DOCKER_PORT); \
-	echo 127.0.0.1:$(DOCKER_PORT); \
-	echo ${C_BLU}"Project Host:"${C_END}; \
-	echo $(DOCKER_HOST):$(DOCKER_PORT); \
+project-stop: ## stops the Project PHP container but data won't be destroyed
+	cd docker && $(MAKE) stop
+
+project-destroy: ## removes the Project PHP from Docker network destroying its data and Docker image
+	cd docker && $(MAKE) clear destroy
+
+project-install: ## installs set version of Project into container
+	cd docker && $(MAKE) app-install
+
+project-update: ## updates set version of Project into container
+	cd docker && $(MAKE) app-update
 
 # -------------------------------------------------------------------------------------------------
 #  Container
 # -------------------------------------------------------------------------------------------------
-.PHONY: ssh build install dev up start first stop restart clear
+.PHONY: sql-install sql-replace sql-backup
 
-ssh:
-	$(DOCKER_EXEC_TOOLS_APP)
+sql-install:
+	sudo docker exec -i $(PROJECT_DB_CAAS) sh -c 'exec mysql $(PROJECT_DB_NAME) -uroot -p"$(PROJECT_DB_ROOT)"' < $(PROJECT_DB_PATH)/$(PROJECT_DB_NAME)-init.sql
 
-build:
-	cd docker && $(DOCKER_COMPOSE) up --build --no-recreate -d
+sql-replace:
+	sudo docker exec -i $(PROJECT_DB_CAAS) sh -c 'exec mysql $(PROJECT_DB_NAME) -uroot -p"$(PROJECT_DB_ROOT)"' < $(PROJECT_DB_PATH)/$(PROJECT_DB_NAME)-backup.sql
 
-install:
-	cd docker && $(DOCKER_EXEC_TOOLS_APP) -c $(COMPOSER_INSTALL)
+sql-backup:
+	sudo docker exec $(PROJECT_DB_CAAS) sh -c 'exec mysqldump $(PROJECT_DB_NAME) -uroot -p"$(PROJECT_DB_ROOT)"' > $(PROJECT_DB_PATH)/$(PROJECT_DB_NAME)-backup.sql
 
-dev:
-	echo ${C_YEL}"\"dev\" recipe has not usage in this project"${C_END};
+# -------------------------------------------------------------------------------------------------
+#  Repository Helper
+# -------------------------------------------------------------------------------------------------
+repo-flush: ## clears local git repository cache specially to update .gitignore
+	git rm -rf --cached .
+	git add .
+	git commit -m "fix: cache cleared for untracked files"
 
-up:
-	cd docker && $(DOCKER_COMPOSE) up -d
-	$(MAKE) docker-host
-
-start:
-	$(MAKE) build up
-
-first:
-	$(MAKE) build install up
-
-stop:
-	cd docker && $(DOCKER_COMPOSE) kill || true
-	cd docker && $(DOCKER_COMPOSE) rm --force || true
-
-restart:
-	$(MAKE) stop start
-
-clear:
-	cd docker && $(DOCKER_COMPOSE) down -v --remove-orphans || true
+repo-commit:
+	echo "git add . && git commit -m \"maint: ... \" && git push -u origin main"
