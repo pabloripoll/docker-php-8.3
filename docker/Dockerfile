@@ -101,7 +101,7 @@ COPY config/fpm-pool.conf /etc/${PHP_V}/php-fpm.d/www.conf
 COPY config/php.ini /etc/${PHP_V}/conf.d/custom.ini
 
 # Configure XDebug
-COPY config/xdebug.ini /etc/${PHP_V}/conf.d/xdebug.ini
+#COPY config/xdebug.ini /etc/${PHP_V}/conf.d/xdebug.ini
 
 # Configure supervisord
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -111,7 +111,6 @@ RUN chown -R docker.docker /var/www/html /run /var/lib/nginx /var/log/nginx
 
 # PHP Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-# ERROR file_put_contents(./composer.lock): Failed to open stream: Permission denied
 
 # Create symlink for php
 RUN ln -s /usr/bin/${PHP_V} /usr/bin/php
