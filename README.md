@@ -220,13 +220,6 @@ SYMFONY docker-compose.yml .env file has been set.
 
 ## Container Information
 
-Running container on Docker
-```bash
-$ sudo docker ps -a
-CONTAINER ID   IMAGE      COMMAND    CREATED      STATUS      PORTS                                             NAMES
-ecd27aeae010   proj...    "docker-php-entrypoi…"  1 min...    9000/tcp, 0.0.0.0:8888->80/tcp, :::8888->80/tcp   project-app
-```
-
 Docker image size
 ```bash
 $ sudo docker images
