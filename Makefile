@@ -67,23 +67,6 @@ project-update: ## updates set version of project into container
 	cd docker && $(MAKE) app-update
 
 # -------------------------------------------------------------------------------------------------
-#  Container
-# -------------------------------------------------------------------------------------------------
-.PHONY: database-install database-replace database-backup
-
-database-install: ## installs into container database the init sql file from resources/database
-	sudo docker exec -i $(DB_CAAS) sh -c 'exec mysql $(DB_NAME) -uroot -p"$(DB_ROOT)"' < $(DB_BACKUP_PATH)/$(DB_BACKUP_NAME)-init.sql
-	echo ${C_YEL}"DATABASE"${C_END}" has been installed."
-
-database-replace: ## replaces container database with the latest sql backup file from resources/database
-	sudo docker exec -i $(DB_CAAS) sh -c 'exec mysql $(DB_NAME) -uroot -p"$(DB_ROOT)"' < $(DB_BACKUP_PATH)/$(DB_BACKUP_NAME)-backup.sql
-	echo ${C_YEL}"DATABASE"${C_END}" has been replaced."
-
-database-backup: ## creates / replace a sql backup file from container database in resources/database
-	sudo docker exec $(DB_CAAS) sh -c 'exec mysqldump $(DB_NAME) -uroot -p"$(DB_ROOT)"' > $(DB_BACKUP_PATH)/$(DB_BACKUP_NAME)-backup.sql
-	echo ${C_YEL}"DATABASE"${C_END}" backup has been created."
-
-# -------------------------------------------------------------------------------------------------
 #  Repository Helper
 # -------------------------------------------------------------------------------------------------
 repo-flush: ## clears local git repository cache specially to update .gitignore

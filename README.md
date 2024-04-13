@@ -99,9 +99,8 @@ Directories and main files on a tree architecture description
 │   └── Makefile
 │
 ├── resources
-│   ├── database
-│   │   ├── project-init.sql
-│   │   └── project-backup.sql
+│   ├── doc
+│   │   └── (any file or directory required for re-building the app...)
 │   │
 │   └── project
 │       └── (any file or directory required for re-building the app...)
@@ -139,9 +138,6 @@ Makefile  project-stop            stops the project container but data will not 
 Makefile  project-destroy         removes the project from Docker network destroying its data and Docker image
 Makefile  project-install         installs set version of project into container
 Makefile  project-update          updates set version of project into container
-Makefile  database-install        installs into container database the init sql file from resources/database
-Makefile  database-replace        replaces container database with the latest sql backup file from resources/database
-Makefile  database-backup         creates / replace a sql backup file from container database in resources/database
 Makefile  repo-flush              clears local git repository cache specially to update .gitignore
 Makefile  repo-commit             echoes commit helper
 ```
@@ -156,26 +152,17 @@ Create a [DOTENV](.env) file from [.env.example](.env.example) and setup accordi
 DOCKER_USER=sudo
 
 # Container data for docker-compose.yml
-PROJECT_TITLE="SYMFONY"   # <- this name will be prompt for Makefile recipes
-PROJECT_ABBR="symfony"    # <- part of the service image tag - useful if similar services are running
-
-# Symfony container
-PROJECT_HOST="127.0.0.1"                    # <- for this project is not necessary
-PROJECT_PORT="8888"                         # <- port access container service on local machine
-PROJECT_CAAS="symfony-app"                  # <- container as a service name to build service
-PROJECT_PATH="../../../symfony"             # <- path where application is binded from container to local
-
-# Database service container
-DB_CAAS="mariadb"                           # <- name of the database docker container service to access by ssh
-DB_NAME="mariadb"                           # <- name of the database to copy or replace
-DB_ROOT="7c4a8d09ca3762af61e59520943d"      # <- database root password
-DB_BACKUP_NAME="symfony"                    # <- the name of the database backup or copy file
-DB_BACKUP_PATH="resources/database"         # <- path where database backup or copy resides
+PROJECT_TITLE="PHP PROJECT"     # <- this name will be prompt for Makefile recipes
+PROJECT_ABBR="proj-php"         # <- part of the service image tag - useful if similar services are running
+PROJECT_HOST="127.0.0.1"        # <- for this project is not necessary
+PROJECT_PORT="8888"             # <- port access container service on local machine
+PROJECT_CAAS="proj-php"         # <- container as a service name to build service
+PROJECT_PATH="../project"       # <- path where application is binded from container to local
 ```
 
 Exacute the following command to create the [docker/.env](docker/.env) file, required for building the container
 ```bash
-$ make symfony-set
+$ make project-set
 PROJECT docker-compose.yml .env file has been set.
 ```
 
@@ -194,6 +181,96 @@ $ make hostname
 192.168.1.41
 ```
 
+## Create the application container service
+
+```bash
+$ make symfony-create
+
+SYMFONY docker-compose.yml .env file has been set.
+
+[+] Building 54.3s (26/26) FINISHED                                                 docker:default
+=> [nginx-php internal] load build definition from Dockerfile                       0.0s
+ => => transferring dockerfile: 2.78kB                                              0.0s
+ => [nginx-php internal] load metadata for docker.io/library/composer:latest        1.5s
+ => [nginx-php internal] load metadata for docker.io/library/php:8.3-fpm-alpine     1.5s
+ => [nginx-php internal] load .dockerignore                                         0.0s
+ => => transferring context: 108B                                                   0.0s
+ => [nginx-php internal] load build context                                         0.0s
+ => => transferring context: 8.30kB                                                 0.0s
+ => [nginx-php] FROM docker.io/library/composer:latest@sha256:63c0f08ca41370...
+...
+ => [nginx-php] exporting to image                                                  1.0s
+ => => exporting layers                                                             1.0s
+ => => writing image sha256:3c99f91a63edd857a0eaa13503c00d500fad57cf5e29ce1d...     0.0s
+ => => naming to docker.io/library/symfony-app:symfony-nginx-php                    0.0s
+[+] Running 1/2
+ ⠴ Network symfony-app_default  Created                                             0.4s
+ ✔ Container symfony-app        Started                                             0.3s
+[+] Running 1/0
+ ✔ Container symfony-app        Running
+```
+
+If container service has been built with the application content completed, accessing by browsing [http://localhost:8888/](http://localhost:8888/) will display the successful installation welcome page.
+
+If container has been built without application, the following Makefile recipe will install the application that is configure in [docker/nginx-php/Makefile](docker/nginx-php/Makefile) service
+```bash
+$ make symfony-install
+```
+
+If container has been built with the application copy from repository, the following Makefile recipe will update the application dependencies
+```bash
+$ make symfony-update
+```
+
+## Container Information
+
+Running container on Docker
+```bash
+$ sudo docker ps -a
+CONTAINER ID   IMAGE      COMMAND    CREATED      STATUS      PORTS                                             NAMES
+ecd27aeae010   symf...    "docker-php-entrypoi…"  1 min...    9000/tcp, 0.0.0.0:8888->80/tcp, :::8888->80/tcp   symfony-app
+```
+
+Docker image size
+```bash
+$ sudo docker images
+REPOSITORY   TAG           IMAGE ID       CREATED         SIZE
+symfony-app  symf...       373f6967199b   5 minutes ago   251MB
+```
+
+Stats regarding the amount of disk space used by the container
+```bash
+$ sudo docker system df
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          1         1         251.4MB   0B (0%)
+Containers      1         1         4B        0B (0%)
+Local Volumes   1         0         117.9MB   117.9MB (100%)
+Build Cache     39        0         10.56kB   10.56kB
+```
+
+## Stopping the Container Service
+
+Using the following Makefile recipe stops application from running, keeping database persistance and application files binded without any loss
+```bash
+$ make symfony-stop
+[+] Stopping 1/1
+ ✔ Container symfony-app  Stopped                                                    0.5s
+```
+
+## Removing the Container Image
+
+To remove application container from Docker network use the following Makefile recipe *(Docker prune commands still needed to be applied manually)*
+```bash
+$ make symfony-destroy
+
+[+] Removing 1/0
+ ✔ Container symfony-app  Removed                                                     0.0s
+[+] Running 1/1
+ ✔ Network symfony-app_default  Removed                                               0.4s
+Untagged: symfony-app:symfony-nginx-php
+Deleted: sha256:3c99f91a63edd857a0eaa13503c00d500fad57cf5e29ce1da3210765259c35b1
+```
+
 Removing container and image generated
 ```bash
 $ sudo docker system prune
@@ -201,7 +278,12 @@ $ sudo docker system prune
 Total reclaimed space: 171.2MB
 ```
 
-*(no need for pruning volume)*
+Pruning Docker volume cache
+```bash
+$ sudo docker volume prune
+...
+Total reclaimed space: 0MB
+```
 
 ## Dockerfile insight
 
