@@ -35,7 +35,7 @@ fix-permission: ## sets project directory permission
 	$(DOCKER_USER) chown -R ${USER}: $(ROOT_DIR)/
 
 host-check: ## shows this project ports availability on local machine
-	cd docker && $(MAKE) port-check
+	cd docker/nginx-php && $(MAKE) port-check
 
 # -------------------------------------------------------------------------------------------------
 #  PHP App Service
@@ -43,28 +43,28 @@ host-check: ## shows this project ports availability on local machine
 .PHONY: project-ssh project-set project-create project-start project-stop project-destroy project-install project-update
 
 project-ssh: ## enters the project container shell
-	cd docker && $(MAKE) ssh
+	cd docker/nginx-php && $(MAKE) ssh
 
 project-set: ## sets the project enviroment file to build the container
-	cd docker && $(MAKE) env-set
+	cd docker/nginx-php && $(MAKE) env-set
 
 project-create: ## creates the project container from Docker image
-	cd docker && $(MAKE) env-set build up
+	cd docker/nginx-php && $(MAKE) env-set build up
 
 project-start: ## starts the project container running
-	cd docker && $(MAKE) start
+	cd docker/nginx-php && $(MAKE) start
 
 project-stop: ## stops the project container but data won't be destroyed
-	cd docker && $(MAKE) stop
+	cd docker/nginx-php && $(MAKE) stop
 
 project-destroy: ## removes the project from Docker network destroying its data and Docker image
-	cd docker && $(MAKE) clear destroy
+	cd docker/nginx-php && $(MAKE) clear destroy
 
 project-install: ## installs set version of project into container
-	cd docker && $(MAKE) app-install
+	cd docker/nginx-php && $(MAKE) app-install
 
 project-update: ## updates set version of project into container
-	cd docker && $(MAKE) app-update
+	cd docker/nginx-php && $(MAKE) app-update
 
 # -------------------------------------------------------------------------------------------------
 #  Repository Helper
