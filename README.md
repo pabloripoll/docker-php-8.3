@@ -57,7 +57,6 @@ command=php-fpm83 -F
 ```
 
 ## Dockerfile insight
-
 ```
 # Install main packages and remove default server definition
 RUN apk add --no-cache \
