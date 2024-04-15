@@ -74,5 +74,5 @@ repo-flush: ## clears local git repository cache specially to update .gitignore
 	git add .
 	git commit -m "fix: cache cleared for untracked files"
 
-repo-commit: ## echoes commit helper
+repo-commit: ## echoes commit helper commands
 	echo "git add . && git commit -m \"maint: ... \" && git push -u origin main"
