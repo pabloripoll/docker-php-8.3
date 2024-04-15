@@ -8,7 +8,7 @@ C_RED='\033[0;31m'
 C_YEL='\033[0;33m'
 C_END='\033[0m'
 
-include ../.env
+include ../../.env
 
 DOCKER_TITLE=$(PROJECT_TITLE)
 DOCKER_ABBR=$(PROJECT_ABBR)
