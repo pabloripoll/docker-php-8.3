@@ -28,11 +28,6 @@ DOCKER_EXEC_TOOLS_APP=$(DOCKER_USER) docker exec -it $(DOCKER_CAAS) sh
 APPLICATION_UPDATE="composer update"
 APPLICATION_INSTALL='composer require --dev phpunit/phpunit ^11'
 
-# https://github.com/8ctopus/apache-php-fpm-alpine/blob/master/Dockerfile
-# https://packagist.org/packages/phpunit/phpunit
-# https://docs.phpunit.de/en/11.1/installation.html
-
-
 help: ## shows this Makefile help message
 	echo 'usage: make [target]'
 	echo
