@@ -145,7 +145,7 @@ Makefile  project-destroy         removes the project from Docker network destro
 Makefile  project-install         installs set version of project into container
 Makefile  project-update          updates set version of project into container
 Makefile  repo-flush              clears local git repository cache specially to update .gitignore
-Makefile  repo-commit             echoes commit helper
+Makefile  repo-commit             echoes commit helper commands
 ```
 
 ## Service Configuration
