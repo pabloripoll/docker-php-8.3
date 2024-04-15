@@ -82,27 +82,27 @@ ssh: ## enters the container shell
 	$(DOCKER_EXEC_TOOLS_APP)
 
 build: ## builds the container from Dockerfile
-	$(DOCKER_COMPOSE) up --build --no-recreate -d
+	cd docker && $(DOCKER_COMPOSE) up --build --no-recreate -d
 
 up: ## attaches to containers for a service and also starts any linked services
-	$(DOCKER_COMPOSE) up -d
+	cd docker && $(DOCKER_COMPOSE) up -d
 
 start: ## starts the container running
-	$(DOCKER_COMPOSE) start
+	cd docker && $(DOCKER_COMPOSE) start
 
 stop: ## stops the container running - data won't be destroyed
-	$(DOCKER_COMPOSE) stop
+	cd docker && $(DOCKER_COMPOSE) stop
 
 restart: ## execute this Makefile "stop" & "start" recipes
 	$(MAKE) stop start
 
 clear: ## removes container from Docker running containers
-	$(DOCKER_COMPOSE) kill || true
-	$(DOCKER_COMPOSE) rm --force || true
-	$(DOCKER_COMPOSE) down -v --remove-orphans || true
+	cd docker && $(DOCKER_COMPOSE) kill || true
+	cd docker && $(DOCKER_COMPOSE) rm --force || true
+	cd docker && $(DOCKER_COMPOSE) down -v --remove-orphans || true
 
 destroy: ## delete container image from Docker - Docker prune commands still needed to be applied manually
-	$(DOCKER_USER) docker rmi $(DOCKER_CAAS):$(DOCKER_ABBR)
+	cd docker && $(DOCKER_USER) docker rmi $(DOCKER_CAAS):$(DOCKER_ABBR)
 
 dev: ## set a development enviroment
 	echo ${C_YEL}"\"dev\" recipe has not usage in this project"${C_END};
@@ -113,10 +113,10 @@ dev: ## set a development enviroment
 .PHONY: app-install app-update
 
 app-install: ## installs the application an dependencies packages
-	$(DOCKER_EXEC_TOOLS_APP) -c $(APPLICATION_INSTALL)
+	cd docker && $(DOCKER_EXEC_TOOLS_APP) -c $(APPLICATION_INSTALL)
 
 app-update: ## updates dependencies packages
-	$(DOCKER_EXEC_TOOLS_APP) -c $(APPLICATION_UPDATE)
+	cd docker && $(DOCKER_EXEC_TOOLS_APP) -c $(APPLICATION_UPDATE)
 
 # -------------------------------------------------------------------------------------------------
 #  Container update on the run
