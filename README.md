@@ -230,11 +230,11 @@ Create a [DOTENV](.env) file from [.env.example](.env.example) and setup accordi
 DOCKER_USER=sudo
 
 # Container data for docker-compose.yml
-PROJECT_TITLE="PHP PROJECT"     # <- this name will be prompt for Makefile recipes
+PROJECT_TITLE="PHP PROJECT"     # <- this name will be prompt for automation commands
 PROJECT_ABBR="proj-php"         # <- part of the service image tag - useful if similar services are running
 PROJECT_HOST="127.0.0.1"        # <- for this project is not necessary
 PROJECT_PORT="8888"             # <- port access container service on local machine
-PROJECT_CAAS="proj-php"         # <- container as a service name to build service
+PROJECT_CAAS="proj-php"         # <- container as a service name to build the service
 PROJECT_PATH="../project"       # <- path where application is binded from container to local
 ```
 
